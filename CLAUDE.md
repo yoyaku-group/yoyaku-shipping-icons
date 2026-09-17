@@ -1,6 +1,6 @@
 # YOYAKU Shipping Icons - CLAUDE.md
 
-> **Plugin:** yoyaku-shipping-icons | **Sites:** YOYAKU.IO, yydistribution.fr | **Version:** 1.8.0
+> **Plugin:** yoyaku-shipping-icons | **Sites:** YOYAKU.IO, yydistribution.fr | **Version:** 1.9.0
 > **Status:** Production | **Last Updated:** 2026-01-30
 
 ## What is YOYAKU Shipping Icons?
@@ -25,7 +25,7 @@ yoyaku-shipping-icons/
 
 ## Key Features
 
-1. **Logo Injection** - Matches shipping method labels against carrier patterns and prepends 50px logo images
+1. **Logo Injection** - Matches shipping method labels against carrier patterns and prepends a carrier logo (`ysl_icon_html()`, `.ysl-shipping-logo`, 28px via assets/shipping-icons.css)
 2. **Rate Sorting** - Sorts shipping rates by price (cheapest first), keeps "Pick up" / "Retrait" at the end
 3. **Multi-Carrier Support** - FedEx, UPS, Chronopost, Colissimo, Spring GDS with priority pattern matching
 
