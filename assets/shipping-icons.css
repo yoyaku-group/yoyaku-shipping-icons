@@ -1,0 +1,20 @@
+/**
+ * yoyaku-shipping-icons — carrier logo styling.
+ *
+ * The logo is injected by ysl_icon_html() as <img class="ysl-shipping-logo">.
+ * Sizing lives here (no inline height) so the cart, the checkout and the
+ * Reserve arrival chooser render identical logos everywhere.
+ */
+
+.ysl-shipping-logo {
+  height: 28px;
+  width: auto;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  .ysl-shipping-logo {
+    height: 22px;
+  }
+}
