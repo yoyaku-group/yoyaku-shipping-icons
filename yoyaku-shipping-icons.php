@@ -3,7 +3,7 @@
  * Plugin Name: Yoyaku Shipping Icons
  * Plugin URI:  https://github.com/benjaminbelaga/yoyaku-shipping-icons
  * Description: Injecte automatiquement un logo devant chaque méthode de livraison WooCommerce (Chronopost, Colissimo, Spring GDS, UPS, FedEx).
- * Version:     1.8.0
+ * Version:     1.9.0
  * Author:      Benjamin Belaga
  * Author URI:  https://github.com/benjaminbelaga
  * License:     GPL2+
@@ -15,25 +15,16 @@ if ( ! defined( "ABSPATH" ) ) {
 }
 
 /**
- * ysl_debug_and_icon()
+ * ysl_match_icon()
  *
- * Logge chaque méthode de livraison et injecte un logo adapté devant le label.
+ * Résout le logo adapté à un libellé de livraison. L'ordre des motifs
+ * compte : les plus spécifiques d'abord.
  *
- * @param string           $label  Le libellé original rendu par WooCommerce.
- * @param WC_Shipping_Rate $method L\objet méthode de livraison.
- * @return string
+ * @param string $label Libellé (HTML accepté : il est nettoyé ici).
+ * @return string Nom de fichier du logo, '' si aucun motif ne correspond.
  */
-function ysl_debug_and_icon( $label, $method ) {
-    // — DEBUG : journalise chaque appel de méthode
-    // error_log( sprintf("[ShippingLabel] label='%s' | id=%s", $label, $method->id) );
-    // error_log( sprintf(
-    //         "[ShippingMethod] id=%s | title=%s",
-    //         $method->id,
-    //         $method->method_title
-    //     ) );
-
-    // — PATTERNS : mot-clé à repérer dans le titre → image PNG (hauteur 50px)
-    // Note: L'ordre est important - les patterns plus spécifiques doivent être en premier
+function ysl_match_icon( $label ) {
+    // — PATTERNS : mot-clé à repérer dans le titre → image PNG (classe CSS ysl-shipping-logo)
     $patterns = array(
         // FedEx patterns (ajouté v1.7.0)
         "fedex priority express"    => "fedex-logo.png",
@@ -71,21 +62,66 @@ function ysl_debug_and_icon( $label, $method ) {
         )
     );
 
-    // — Parcours des motifs et injection du logo dès qu\il y a correspondance
+    // — Parcours des motifs et retour du premier logo correspondant
     foreach ( $patterns as $needle => $file ) {
         if ( strpos( $haystack, $needle ) !== false ) {
-            $img_url = plugin_dir_url( __FILE__ ) . "assets/" . $file;
-            $icon    = sprintf(
-                "<img src=\"%s\" alt=\"\" style=\"height:50px;margin-right:8px;vertical-align:middle;\">",
-                esc_url( $img_url )
-            );
-            return $icon . $label;
+            return $file;
         }
     }
 
-    // Aucun logo trouvé → on renvoie le label sans modification
-    return $label;
+    return "";
 }
+
+/**
+ * ysl_icon_html()
+ *
+ * Helper public réutilisable : renvoie la balise <img> du logo (classe
+ * ysl-shipping-logo) pour un libellé, ou '' si aucun motif ne correspond.
+ * Utilisé par les filtres WooCommerce et par le chooser de livraison du
+ * plugin yoyaku-preorder (Reserve), afin que ce plugin reste la seule
+ * source des logos transporteurs.
+ *
+ * @param string $label Libellé de la méthode de livraison.
+ * @return string
+ */
+function ysl_icon_html( $label ) {
+    $file = ysl_match_icon( $label );
+    if ( "" === $file ) {
+        return "";
+    }
+
+    return sprintf(
+        "<img class=\"ysl-shipping-logo\" src=\"%s\" alt=\"\" loading=\"lazy\" decoding=\"async\">",
+        esc_url( plugin_dir_url( __FILE__ ) . "assets/" . $file )
+    );
+}
+
+/**
+ * ysl_debug_and_icon()
+ *
+ * Injecte le logo adapté devant le libellé WooCommerce (filtres panier,
+ * checkout et Reserve).
+ *
+ * @param string           $label  Le libellé original rendu par WooCommerce.
+ * @param WC_Shipping_Rate $method L\objet méthode de livraison.
+ * @return string
+ */
+function ysl_debug_and_icon( $label, $method ) {
+    return ysl_icon_html( $label ) . $label;
+}
+
+/**
+ * Feuille de style du logo (classe, plus de height inline).
+ */
+function ysl_enqueue_styles() {
+    wp_enqueue_style(
+        "yoyaku-shipping-icons",
+        plugin_dir_url( __FILE__ ) . "assets/shipping-icons.css",
+        array(),
+        "1.9.0"
+    );
+}
+add_action( "wp_enqueue_scripts", "ysl_enqueue_styles" );
 
 /**
  * ysl_sort_shipping_rates()
