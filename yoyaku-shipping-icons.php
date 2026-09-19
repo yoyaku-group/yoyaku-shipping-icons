@@ -8,6 +8,7 @@
  * Author URI:  https://github.com/benjaminbelaga
  * License:     GPL2+
  * Text Domain: yoyaku-shipping-icons
+ * Domain Path: /languages
  */
 
 if ( ! defined( "ABSPATH" ) ) {
